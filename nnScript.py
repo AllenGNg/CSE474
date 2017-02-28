@@ -124,6 +124,9 @@ def preprocess(): # preprocess_small() from Piazza, added to use a smaller test 
 
     # Feature selection
     # Your code here.
+    # Feature selection is a process where your automatically select
+    # those Features in your data that contribute most to the prediction value
+    # in which you are most interested.
     print('preprocess done')
 
 
