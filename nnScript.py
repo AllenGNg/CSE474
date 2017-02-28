@@ -127,6 +127,9 @@ def preprocess(): # preprocess_small() from Piazza, added to use a smaller test 
     # Feature selection is a process where your automatically select
     # those Features in your data that contribute most to the prediction value
     # in which you are most interested.
+    
+    # Get rid of blank space around numbers, get rid of too thin and too fat numbers, 
+    # check ifthere are pixels not on number. 
     print('preprocess done')
 
 
