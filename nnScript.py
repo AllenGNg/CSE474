@@ -131,9 +131,6 @@ def preprocess(): # preprocess_small() from Piazza, added to use a smaller test 
 
     # Get rid of blank space around numbers, get rid of too thin and too fat numbers,
     # check ifthere are pixels not on number.
-    print(test_data)
-    print(len(test_data[0]))
-
     i = 0
     done = len(test_data.T)
     while(i < done):
@@ -149,9 +146,6 @@ def preprocess(): # preprocess_small() from Piazza, added to use a smaller test 
         else:
             i = i + 1
 
-    print(len(test_data[0]))
-    print('preprocess done')
-    print(test_label)
     return train_data, train_label, validation_data, validation_label, test_data, test_label
 
 """
@@ -298,18 +292,6 @@ def nnObjFunction(params, *args):
     %     layer to unit i in output layer."""
 
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
-    print("n_input")
-    print(n_input)
-    print("n_hidden")
-    print(n_hidden)
-    print("n_class")
-    print(n_class)
-    print("training data")
-    print(training_data)
-    print("training label")
-    print(training_label)
-    print("lambda value")
-    print(lambdaval)
     w1 = params[0:n_hidden * (n_input + 1)].reshape((n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     obj_val = 0
@@ -317,17 +299,32 @@ def nnObjFunction(params, *args):
     # Your code here
     #obj_grad = np.concatenate((w1.flatten(),w2.flatten()),0)
     #hidden_array = np.zeros(len(w1))
-    print("Weight matrix")
-    print(len(w1))
-    print(len(w1[0]))
-
-    print(len)
+    # for data p 0 to 4996 + 1
+    # do: weight[row,col] * data[p]
+    print("Training data statistics")
+    print("The following number is the amount of samples")
     print(len(training_data))
+    print("The following number is the amount of elements in each")
     print(len(training_data[0]))
+    print("The following is the number of elements in that row")
     print(training_data[0][0])
-    z1 = training_data.dot(w1) + w1[-1]
+    X1 = np.hstack([np.ones([training_data.shape[0],1]),training_data])
+    hidden_layer = np.zeros(n_hidden+1)
+    for e in range(0,n_hidden):
+        hidden_layer[e] = sigmoid(np.dot(w1[e],X1[e]))
+    hidden_layer[n_hidden] = 1.0
+
+    print(hidden_layer.size)
     print("z1")
-    print(z1)
+    print(hidden_layer)
+    output_layer = np.zeros(n_class)
+    print(len(w2[0]))
+    print(len(hidden_layer))
+    for e in range(0,n_class):
+        output_layer[e] = sigmoid(np.dot(w2[e],hidden_layer))
+    print(output_layer)
+    #for layer in range(0,n_hidden):
+    #    z1[layer] = training_data[layer].dot(w1[layer][:]) + w1[layer][-1]
     # Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     # you would use code similar to the one below to create a flat array
     obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
