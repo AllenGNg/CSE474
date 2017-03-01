@@ -2,7 +2,8 @@ import numpy as np
 from scipy.optimize import minimize
 from scipy.io import loadmat
 from math import sqrt
-
+import matplotlib.pyplot as plt
+import random
 
 def initializeWeights(n_in, n_out):
     """
@@ -51,7 +52,7 @@ def preprocess(): # preprocess_small() from Piazza, added to use a smaller test 
      - feature selection"""
 
 
-    mat = loadmat('../basecode/mnist_sample.mat')
+    mat = loadmat('mnist_sample.mat')
         # ------------Initialize preprocess arrays----------------------#
     train_preprocess = np.zeros(shape=(4996, 784))
     validation_preprocess = np.zeros(shape=(1000, 784))
@@ -127,19 +128,36 @@ def preprocess(): # preprocess_small() from Piazza, added to use a smaller test 
     # Feature selection is a process where your automatically select
     # those Features in your data that contribute most to the prediction value
     # in which you are most interested.
-    
-    # Get rid of blank space around numbers, get rid of too thin and too fat numbers, 
-    # check ifthere are pixels not on number. 
+
+    # Get rid of blank space around numbers, get rid of too thin and too fat numbers,
+    # check ifthere are pixels not on number.
+    print(test_data)
+    print(len(test_data[0]))
+
+    i = 0
+    done = len(test_data.T)
+    while(i < done):
+        delete_me = True
+        for j in ((test_data.T)[i]):
+            if j != 0:
+                delete_me = False
+                break;
+        if delete_me:
+            test_data =np.delete(test_data,i,1)
+            done = done -1
+            delete_me = True
+        else:
+            i = i + 1
+
+    print(len(test_data[0]))
     print('preprocess done')
-
-
+    print(test_label)
     return train_data, train_label, validation_data, validation_label, test_data, test_label
-
 
 """
 def preprocess():
-    """ Input:
-     Although this function doesn't have any input, you are required to load
+     #Input:
+     #Although this function doesn't have any input, you are required to load
      the MNIST data set from file 'mnist_all.mat'.
 
      Output:
@@ -157,7 +175,7 @@ def preprocess():
        set
 
      Some suggestions for preprocessing step:
-     - feature selection"""
+     - feature selection
 
     mat = loadmat('mnist_all.mat')  # loads the MAT object as a Dictionary
 
@@ -280,24 +298,40 @@ def nnObjFunction(params, *args):
     %     layer to unit i in output layer."""
 
     n_input, n_hidden, n_class, training_data, training_label, lambdaval = args
-
+    print("n_input")
+    print(n_input)
+    print("n_hidden")
+    print(n_hidden)
+    print("n_class")
+    print(n_class)
+    print("training data")
+    print(training_data)
+    print("training label")
+    print(training_label)
+    print("lambda value")
+    print(lambdaval)
     w1 = params[0:n_hidden * (n_input + 1)].reshape((n_hidden, (n_input + 1)))
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     obj_val = 0
 
     # Your code here
-    #
-    #
-    #
-    #
-    #
+    #obj_grad = np.concatenate((w1.flatten(),w2.flatten()),0)
+    #hidden_array = np.zeros(len(w1))
+    print("Weight matrix")
+    print(len(w1))
+    print(len(w1[0]))
 
-
-
+    print(len)
+    print(len(training_data))
+    print(len(training_data[0]))
+    print(training_data[0][0])
+    z1 = training_data.dot(w1) + w1[-1]
+    print("z1")
+    print(z1)
     # Make sure you reshape the gradient matrices to a 1D array. for instance if your gradient matrices are grad_w1 and grad_w2
     # you would use code similar to the one below to create a flat array
-    # obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
-    obj_grad = np.array([])
+    obj_grad = np.concatenate((grad_w1.flatten(), grad_w2.flatten()),0)
+    # obj_grad = np.array(len(w1))
 
     return (obj_val, obj_grad)
 
@@ -319,9 +353,8 @@ def nnPredict(w1, w2, data):
     % Output:
     % label: a column vector of predicted labels"""
 
-    labels = np.array([])
-    # Your code here
 
+    labels = np.array([])
     return labels
 
 
@@ -372,7 +405,6 @@ w2 = nn_params.x[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
 predicted_label = nnPredict(w1, w2, train_data)
 
 # find the accuracy on Training Dataset
-
 print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
 
 predicted_label = nnPredict(w1, w2, validation_data)
