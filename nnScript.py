@@ -297,11 +297,14 @@ def nnObjFunction(params, *args):
     w2 = params[(n_hidden * (n_input + 1)):].reshape((n_class, (n_hidden + 1)))
     obj_val = 0
     obj_grad = np.array([])
-
     """********FORWARD PASS**********"""
-    x1 = np.hstack([np.ones([training_data.shape[0],1]),training_data])
+    #x1 = np.hstack([np.ones([training_data.shape[0],1]),training_data])
+    m = np.ones((len(training_data),1))
+    x1 = np.c_[training_data,m]
     hidden_layer = sigmoid(np.dot(x1,w1.T))
-    x2 = np.hstack([np.ones([hidden_layer.shape[0],1]),hidden_layer])
+    #x2 = np.hstack([np.ones([hidden_layer.shape[0],1]),hidden_layer])
+    m = np.ones((len(hidden_layer),1))
+    x2 = np.c_[hidden_layer,m]
     output_layer = sigmoid(np.dot(x2,w2.T))
 
     """*********** BACKWARD PROPOGATESTUFF**********"""
@@ -320,13 +323,13 @@ def nnObjFunction(params, *args):
     new_w1 = np.dot(delta_hidden.T, x1)
     new_w2 = np.dot(delta_out.T,x2)
 
-    new_w1 = new_w1[:-1:]
+    new_w1 = new_w1[:-1]
 
     grad_w1 =  new_w1
     grad_w2 =  new_w2
 
-    grad_w1 = (grad_w1 + lambdaval*w1)/len(training_data.T)
-    grad_w2 = (grad_w2 + lambdaval*w2)/len(training_data.T)
+    grad_w1 = (grad_w1 + lambdaval*w1)/len(training_data)
+    grad_w2 = (grad_w2 + lambdaval*w2)/len(training_data)
     obj_grad = np.concatenate((grad_w1.flatten(),grad_w2.flatten()),0)
 
     return (obj_val, obj_grad)
@@ -347,10 +350,15 @@ def nnPredict(w1, w2, data):
 
     % Output:
     % label: a column vector of predicted labels"""
-
+    
     labels = np.array([])
+    bias = np.ones((np.size(data,0),1))
+    data = np.c_[data,bias]
+    hidden_layer = sigmoid(np.dot(data,w1.T))
+    hidden_layer = np.c_[hidden_layer,bias]
+    labels = sigmoid(np.dot(hidden_layer,w2.T))
 
-    return labels
+    return np.argmax(labels,axis=1)
 
 """**************Neural Network Script Starts here********************************"""
 
