@@ -4,6 +4,7 @@ from scipy.io import loadmat
 from math import sqrt
 import matplotlib.pyplot as plt
 import random
+import pickle
 
 def initializeWeights(n_in, n_out):
     """
@@ -134,21 +135,7 @@ def preprocess(): # preprocess_small() from Piazza, added to use a smaller test 
     # Get rid of blank space around numbers, get rid of too thin and too fat numbers,
     # check ifthere are pixels not on number.
 
-    i = 0
-    done = len(train_data.T)
-    while(i < done):
-        delete_me = True
-        for j in ((train_data.T)[i]):
-            if j != 0:
-                delete_me = False
-                break;
-        if delete_me:
-            train_data =np.delete(train_data,i,1)
-            test_data = np.delete(test_data,i,1)
-            done = done -1
-            delete_me = True
-        else:
-            i = i + 1
+
 
     return train_data, train_label, validation_data, validation_label, test_data, test_label
 """
@@ -249,10 +236,31 @@ def preprocess():
 
     # Feature selection
     # Your code here.
+    i = 0
+    keep = 0
+    done = len(train_data.T)
+    indexes = []
+    while(i < done):
+        delete_me = True
+        for j in ((train_data.T)[i]):
+            if j != 0:
+                delete_me = False
+                break;
+        if delete_me:
+            train_data =np.delete(train_data,i,1)
+            test_data = np.delete(test_data,i,1)
+            validation_data = np.delete(validation_data,i,1)
+            done = done -1
+            delete_me = True
+        else:
+            indexes.append(keep)
+            keep += 1
+            i = i + 1
+
+    selected_features = np.array(indexes)
 
     print('preprocess done')
-
-    return train_data, train_label, validation_data, validation_label, test_data, test_label
+    return train_data, train_label, validation_data, validation_label, test_data, test_label, selected_features
 
 def nnObjFunction(params, *args):
     """% nnObjFunction computes the value of objective function (negative log
@@ -350,7 +358,7 @@ def nnPredict(w1, w2, data):
 
     % Output:
     % label: a column vector of predicted labels"""
-    
+
     labels = np.array([])
     bias = np.ones((np.size(data,0),1))
     data = np.c_[data,bias]
@@ -362,14 +370,14 @@ def nnPredict(w1, w2, data):
 
 """**************Neural Network Script Starts here********************************"""
 
-train_data, train_label, validation_data, validation_label, test_data, test_label = preprocess()
+train_data, train_label, validation_data, validation_label, test_data, test_label, selected_features = preprocess()
 
 #   Neural Network
 
 # set the number of nodes in input unit (not including bias unit)
 n_input = train_data.shape[1]
 # set the number of nodes in hidden unit (not including bias unit)
-n_hidden = 50
+n_hidden = 150
 # set the number of nodes in output unit
 n_class = 10
 # initialize the weights into some random matrices
@@ -406,14 +414,25 @@ predicted_label = nnPredict(w1, w2, train_data)
 # find the accuracy on Training Dataset
 print('\n Training set Accuracy:' + str(100 * np.mean((predicted_label == train_label).astype(float))) + '%')
 
+train = 100 * np.mean((predicted_label == train_label).astype(float));
 predicted_label = nnPredict(w1, w2, validation_data)
 
 # find the accuracy on Validation Dataset
 
 print('\n Validation set Accuracy:' + str(100 * np.mean((predicted_label == validation_label).astype(float))) + '%')
 
+val = 100 * np.mean((predicted_label == test_label).astype(float));
 predicted_label = nnPredict(w1, w2, test_data)
 
 # find the accuracy on Validation Dataset
 
 print('\n Test set Accuracy:' + str(100 * np.mean((predicted_label == test_label).astype(float))) + '%')
+test = 100 * np.mean((predicted_label == test_label).astype(float));
+
+# collect statistics
+with open("data.txt","a") as datafile:
+    datafile.write(str(n_hidden) + "\t" + str(lambdaval) + "\t " + str(train) + "\t" + str(val) + "\t" + str(test) + "\n")
+    #+ "\t" + str(100 * np.mean((predicted_label == validation_label).astype(float))) + "\t" + str(100 * np.mean((predicted_label == test_label).astype(float))))
+# pickle dump
+obj = [selected_features, n_hidden, w1, w2, lambdaval]
+pickle.dump(obj, open('params.pickle','wb'))
